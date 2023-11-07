@@ -8,11 +8,12 @@ spring:
           destination: ${kafkaprops.reviewPlacedTopic}
           producer:
             use-native-encoding: true
+            partition-key-expression: headers['X-PARTITION-KEY']
+            partition-count: 3
       kafka:
         binder:
           brokers: localhost:9092
           replication-factor: 1
-          min-partition-count: 3
         bindings:
           reviewSupplier-out-0:
             producer:
@@ -23,3 +24,6 @@ spring:
 
 kafkaprops:
   reviewPlacedTopic: review.placement.v1
+  partitionCount: 3
+server:
+  port: 9000

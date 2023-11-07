@@ -1,10 +1,23 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+buildscript {
+    repositories {
+        gradlePluginPortal()
+        maven {
+            url = "https://packages.confluent.io/maven/"
+        }
+        maven {
+            url = "https://jitpack.io"
+        }
+    }
+}
+
 plugins {
     id 'org.springframework.boot' version '3.1.5'
     id 'io.spring.dependency-management' version '1.1.3'
     id 'org.jetbrains.kotlin.jvm' version '1.8.22'
     id 'org.jetbrains.kotlin.plugin.spring' version '1.8.22'
+    id "com.github.imflog.kafka-schema-registry-gradle-plugin" version "1.6.0"
     id 'com.github.davidmc24.gradle.plugin.avro' version "1.3.0"
 }
 
@@ -19,6 +32,9 @@ repositories {
     mavenCentral()
     maven {
         url = "https://packages.confluent.io/maven/"
+    }
+    maven {
+        url = "https://jitpack.io"
     }
 }
 
@@ -45,6 +61,14 @@ dependencies {
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+schemaRegistry {
+    url = 'http://localhost:8081'
+    quiet = true
+    register {
+        subject('avro-reviewplaced-value', 'src/main/avro/review-placed.avsc', 'AVRO')
     }
 }
 

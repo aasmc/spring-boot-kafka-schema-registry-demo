@@ -8,5 +8,5 @@ import org.springframework.boot.with
 class TestReviewproducerApplication
 
 fun main(args: Array<String>) {
-    fromApplication<ReviewproducerApplication>().with(TestReviewproducerApplication::class).run(*args)
+    fromApplication<ReviewProducerApplication>().with(TestReviewproducerApplication::class).run(*args)
 }

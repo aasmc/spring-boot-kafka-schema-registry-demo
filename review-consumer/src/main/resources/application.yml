@@ -1,0 +1,28 @@
+server:
+  port: 9001
+
+spring:
+  application:
+    name: review-consumer
+  cloud:
+    stream:
+      bindings:
+        consumeReviewPlacedEvent-in-0:
+          destination: ${kafkaprops.reviewPlacedTopic}
+          group: ${spring.application.name}
+          consumer:
+            use-native-decoding: true
+      kafka:
+        binder:
+          brokers: localhost:9092
+        bindings:
+          consumeReviewPlacedEvent-in-0:
+            consumer:
+              configuration:
+                value.deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+                schema.registry.url: http://localhost:8081
+                specific.avro.reader: true
+
+
+kafkaprops:
+  reviewPlacedTopic: review.placement.v1
