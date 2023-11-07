@@ -365,3 +365,8 @@ local machine.
 You can use Postman to send requests. Example postman collection with single POST request is in
 postman directory. 
 
+## Useful Links 
+- https://developer.confluent.io/courses/schema-registry/key-concepts/
+- https://github.com/confluentinc/learn-kafka-courses
+- https://github.com/rogervinas/spring-cloud-stream-kafka-confluent-avro-schema-registry
+- https://docs.spring.io/spring-cloud-stream/reference/kafka/kafka_overview.html
