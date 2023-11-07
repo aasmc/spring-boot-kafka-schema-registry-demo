@@ -3,6 +3,23 @@ spring:
     name: review-producer
   cloud:
     stream:
-      default:
-        contentType: application/*+avro
+      bindings:
+        reviewSupplier-out-0:
+          destination: ${kafkaprops.reviewPlacedTopic}
+          producer:
+            use-native-encoding: true
+      kafka:
+        binder:
+          brokers: localhost:9092
+          replication-factor: 1
+          min-partition-count: 3
+        bindings:
+          reviewSupplier-out-0:
+            producer:
+              configuration:
+                value.serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+                schema.registry.url: http://localhost:8081
 
+
+kafkaprops:
+  reviewPlacedTopic: review.placement.v1
