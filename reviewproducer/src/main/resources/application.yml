@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: review-producer
+  cloud:
+    stream:
+      default:
+        contentType: application/*+avro
+
