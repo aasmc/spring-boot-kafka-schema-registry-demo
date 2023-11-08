@@ -83,3 +83,21 @@ services:
       xeotek_kadeck_db_username: "postgres"
       xeotek_kadeck_db_password: "postgres"
       xeotek_kadeck_db_url: "jdbc:postgresql://kadeck-db:5432/kadeckweb"
+
+# confluentinc/cp-ksql-server:5.4.9
+  primary-ksqldb-server:
+    image: confluentinc/ksqldb-server:0.29.0
+    hostname: primary-ksqldb-server
+    container_name: primary-ksqldb-server
+    depends_on:
+      - kafka
+      - schema-registry
+    ports:
+      - "8088:8088"
+    environment:
+      KSQL_LISTENERS: http://0.0.0.0:8088
+      KSQL_BOOTSTRAP_SERVERS: kafka:29092
+      KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
+      KSQL_KSQL_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+

@@ -1,0 +1,11 @@
+server:
+  port: 9010
+
+spring:
+  application:
+    name: review-ksqldb-consumer
+
+ksqldbprops:
+  host: localhost
+  port: 8088
+
