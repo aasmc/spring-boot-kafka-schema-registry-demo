@@ -1,5 +1,5 @@
 server:
-  port: 9001
+  port: 9003
 
 spring:
   application:
@@ -19,6 +19,7 @@ spring:
           consumeReviewPlacedEvent-in-0:
             consumer:
               configuration:
+                key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
                 value.deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
                 schema.registry.url: http://localhost:8081
                 specific.avro.reader: true
