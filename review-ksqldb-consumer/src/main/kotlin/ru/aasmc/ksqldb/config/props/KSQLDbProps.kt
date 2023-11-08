@@ -5,6 +5,8 @@ import org.springframework.boot.context.properties.bind.ConstructorBinding
 
 @ConfigurationProperties(prefix = "ksqldbprops")
 class KSQLDbProps @ConstructorBinding constructor(
-        var host: String,
-        var port: Int
+        val host: String,
+        val port: Int,
+        val reviewPlacedTopic: String,
+        val reviewTable: String
 )

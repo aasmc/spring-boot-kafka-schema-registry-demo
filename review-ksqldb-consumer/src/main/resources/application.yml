@@ -8,4 +8,5 @@ spring:
 ksqldbprops:
   host: localhost
   port: 8088
-
+  reviewPlacedTopic: review.placement.v1
+  reviewTable: reviews_placed_view
