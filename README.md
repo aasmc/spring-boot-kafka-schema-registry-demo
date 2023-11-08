@@ -1,6 +1,20 @@
 # Kafka Schema Registry With Spring Boot Demo App
 
-Demo app that demonstrates the use of Kafka, Avro serialization and Schema Registry.
+Demo app that demonstrates the use of the following technologies: 
+- Apache Kafka
+- Avro serialization 
+- Confluent Schema Registry
+- kSQLDb
+
+The project contains the following subprojects, implemented as independent spring-boot services:
+- Review Producer (here all the Review Events originate)
+- Review Consumer (simple Spring Cloud Stream Kafka consumer)
+- Review KSQLDb Consumer (consumer that uses KSQLDb to capture ReviewPlacedEvents from Kafka topic and store them in KSQLDb)
+
+Logic of the app is very simple:
+A client can POST a review to a Review Producer endpoint. Review Producer then handles the review and sends
+ReviewPlacedEvent to a Kafka topic. 
+A client can also ask ReviewKsqldbConsumer for all reviews (actually it returns 10) or reviews with rating above specified threshold.
 
 ## Review Producer
 Exposes HTTP endpoint:
@@ -332,17 +346,68 @@ tasks.named('test') {
 }
 ```
 
+## Review KSQLDb Consumer
+Collects reviews from Kafka topic `review.placement.v1` in a KSQLDb table `reviews_placed_view`.
+The table is created on start up by executing the following statement: 
+```sql
+CREATE SOURCE TABLE IF NOT EXISTS reviews_placed_view (
+    EVENTID STRING PRIMARY KEY,
+    REVIEWID STRING,
+    BODY STRING,
+    RATING INT
+) WITH (
+    kafka_topic='review.placement.v1',
+    value_format='AVRO'
+);
+```
+
+The table is stored on ksqldb server, which is running in docker container.
+To connect to the ksqldb server we use `io.confluent.ksql.api.client.Client`:
+```kotlin
+@Bean
+fun ksqlClient(): Client {
+    val options = ClientOptions.create()
+            .setHost(props.host)
+            .setPort(props.port)
+    return Client.create(options)
+}
+```
+
+ReviewKsqldbConsumer exposes the following endpoints:
+- GET http://localhost:9010/reviews/v1 to retrieve all reviews (actually 10)
+- GET http://localhost:9010/reviews/v1/{int} (to retrieve all reviews with rating above or equal to path variable param)
+
+Information is retrieved from ksqldb via configured Client. 
+
+```kotlin
+override fun getAllReviews(): List<ReviewResponseDto> {
+    log.info("Executing getAllReviews stream query")
+    val reviews = client.streamQuery("SELECT * FROM ${props.reviewTable} LIMIT 10;")
+            .get()
+    return handleReviewsStreamQueryResult(reviews)
+}
+
+private fun mapRowToResponse(row: Row): ReviewResponseDto {
+    log.info("Mapping Stream Query Result row: {}", row)
+    val reviewId = UUID.fromString(row.getString("REVIEWID"))
+    val body = row.getString("BODY")
+    val rating = row.getInteger("RATING")
+    return ReviewResponseDto(reviewId, body, rating)
+}
+```
+
 ## Starting the application:
 1. Start Docker containers with the following command from the root dir:
 ```shell
 docker-compose up -d
 ```
-There are 5 containers:
+There are 6 containers:
 - Zookeper
 - Kafka
 - Schema Registry
 - Postgres (for kadeck)
 - kadeck (UI tool to monitor Kafka topics and Schema registry) available at http://localhost:80
+- ksqldb-server
 
 2. When all containers are up, register AVRO schema with the following command from reviewproducer dir:
 ```shell
@@ -359,9 +424,11 @@ schemaRegistry {
     }
 }
 ```
-3. After successfully registering the schema, run both Review Producer and Review Consumer applications on your
-local machine. 
-4. Now you can send an HTTP POST request to http://localhost:9000/reviews/v1
+3. After successfully registering the schema, run all the Spring Boot apps from the root project dir on your local machine. 
+4. Now you can send:
+   - HTTP POST request to http://localhost:9000/reviews/v1
+   - HTTP GET request to http://localhost:9010/reviews/v1 (retrieves 10 reviews)
+   - HTTP GET request to http://localhost:9010/reviews/v1/{int} (reviews with rating above or equal to path variable)
 You can use Postman to send requests. Example postman collection with single POST request is in
 postman directory. 
 
@@ -370,3 +437,4 @@ postman directory.
 - https://github.com/confluentinc/learn-kafka-courses
 - https://github.com/rogervinas/spring-cloud-stream-kafka-confluent-avro-schema-registry
 - https://docs.spring.io/spring-cloud-stream/reference/kafka/kafka_overview.html
+- https://piotrminkowski.com/2022/06/22/introduction-to-ksqldb-on-kubernetes-with-spring-boot/

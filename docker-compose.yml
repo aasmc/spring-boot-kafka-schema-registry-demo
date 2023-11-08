@@ -84,7 +84,6 @@ services:
       xeotek_kadeck_db_password: "postgres"
       xeotek_kadeck_db_url: "jdbc:postgresql://kadeck-db:5432/kadeckweb"
 
-# confluentinc/cp-ksql-server:5.4.9
   primary-ksqldb-server:
     image: confluentinc/ksqldb-server:0.29.0
     hostname: primary-ksqldb-server
