@@ -22,7 +22,7 @@ spring:
                 key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
                 value.deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
                 schema.registry.url: http://localhost:8081
-                specific.avro.reader: true
+                specific.avro.reader: false
 
 
 kafkaprops:
